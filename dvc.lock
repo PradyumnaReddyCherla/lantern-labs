@@ -1,0 +1,182 @@
+schema: '2.0'
+stages:
+  download:
+    cmd: python src/download.py
+    deps:
+    - path: src/download.py
+      hash: md5
+      md5: acc0e740e18950813231c2a331108318
+      size: 430
+      isexec: true
+    params:
+      params.yaml:
+        download:
+          ticker: AAPL
+          forms:
+          - 10-K
+          - 10-Q
+          after: '2024-01-01'
+          before: '2026-01-01'
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: ad224f9ef7a916ff91127ada34ef20eb.dir
+      size: 35950832
+      nfiles: 8
+  render:
+    cmd: python src/render.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: ad224f9ef7a916ff91127ada34ef20eb.dir
+      size: 35950832
+      nfiles: 8
+    - path: src/render.py
+      hash: md5
+      md5: 57fd7da90504d54123582c75006cbe5b
+      size: 1016
+      isexec: true
+    outs:
+    - path: data/rendered
+      hash: md5
+      md5: 04724531f6e5e5256b32acf1a7352331.dir
+      size: 1448638
+      nfiles: 4
+  unpack_xbrl:
+    cmd: python src/unpack_xbrl.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: 3b3289d8357a9eeda3a11339b0b702dc.dir
+      size: 60783408
+      nfiles: 298
+    - path: src/unpack_xbrl.py
+      hash: md5
+      md5: b9adebf064ccbbc27ab2e200e4f881a2
+      size: 868
+      isexec: true
+  parse_text:
+    cmd: python src/parse_text.py
+    deps:
+    - path: data/rendered
+      hash: md5
+      md5: 04724531f6e5e5256b32acf1a7352331.dir
+      size: 1448638
+      nfiles: 4
+    - path: src/ocr_fallback.py
+      hash: md5
+      md5: 708f920bc4d13c16c1dd2d4f9ffa9544
+      size: 890
+      isexec: true
+    - path: src/parse_text.py
+      hash: md5
+      md5: e6e2516a7a8c3d64ee8a8e8398f9fe1e
+      size: 2465
+      isexec: true
+    params:
+      params.yaml:
+        ocr:
+          min_chars: 50
+          junk_ratio: 0.3
+          dpi: 300
+    outs:
+    - path: data/parsed
+      hash: md5
+      md5: c4916c5969da57376e070ba6eb3f177c.dir
+      size: 17975904
+      nfiles: 185
+  tables:
+    cmd: python src/tables.py
+    deps:
+    - path: data/rendered
+      hash: md5
+      md5: 04724531f6e5e5256b32acf1a7352331.dir
+      size: 1448638
+      nfiles: 4
+    - path: src/normalize.py
+      hash: md5
+      md5: 48b41d8fe5490401c2c64e1c243f6192
+      size: 793
+    - path: src/tables.py
+      hash: md5
+      md5: 5a2628f7038cc5d02e21848614c45853
+      size: 4710
+      isexec: true
+    params:
+      params.yaml:
+        tables:
+          min_rulings: 6
+          accept_score: 80
+    outs:
+    - path: data/tables
+      hash: md5
+      md5: e69569d7dc939b08ada463c130db6959.dir
+      size: 4893
+      nfiles: 15
+  layout:
+    cmd: python src/layout.py
+    deps:
+    - path: data/rendered
+      hash: md5
+      md5: 04724531f6e5e5256b32acf1a7352331.dir
+      size: 1448638
+      nfiles: 4
+    - path: src/layout.py
+      hash: md5
+      md5: 42073c29e5371bc7cdde599333cf15be
+      size: 2481
+      isexec: true
+    outs:
+    - path: data/layout
+      hash: md5
+      md5: d7174c6a8a39b8cf346f032ed745159c.dir
+      size: 5193
+      nfiles: 1
+  docling:
+    cmd: python src/run_docling.py
+    deps:
+    - path: data/rendered
+      hash: md5
+      md5: 04724531f6e5e5256b32acf1a7352331.dir
+      size: 1448638
+      nfiles: 4
+    - path: src/run_docling.py
+      hash: md5
+      md5: 81767573eceb01512fcdde1c8ea40999
+      size: 1087
+      isexec: true
+    outs:
+    - path: data/docling
+      hash: md5
+      md5: ea97de75fe82c0c2db845636fbf7d232.dir
+      size: 3969097
+      nfiles: 52
+  export:
+    cmd: python src/export.py
+    deps:
+    - path: data/parsed
+      hash: md5
+      md5: c4916c5969da57376e070ba6eb3f177c.dir
+      size: 17975904
+      nfiles: 185
+    - path: data/tables
+      hash: md5
+      md5: e69569d7dc939b08ada463c130db6959.dir
+      size: 4893
+      nfiles: 15
+    - path: src/export.py
+      hash: md5
+      md5: a590953d2b0124ceec3f040ea6d2722b
+      size: 2905
+      isexec: true
+    - path: src/schema.py
+      hash: md5
+      md5: 26b93171088ea1a961152fa4953be4f1
+      size: 932
+      isexec: true
+    outs:
+    - path: data/export
+      hash: md5
+      md5: d0b082e0a8c3843fae69017aaea925c6.dir
+      size: 10616
+      nfiles: 1

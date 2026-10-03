@@ -1,0 +1,71 @@
+stages:
+  download:
+    cmd: python src/download.py
+    deps:
+      - src/download.py
+    params:
+      - download
+    outs:
+      - data/raw
+
+  render:
+    cmd: python src/render.py
+    deps:
+      - src/render.py
+      - data/raw
+    outs:
+      - data/rendered
+
+  unpack_xbrl:
+    cmd: python src/unpack_xbrl.py
+    deps:
+      - src/unpack_xbrl.py
+      - data/raw
+
+  parse_text:
+    cmd: python src/parse_text.py
+    deps:
+      - src/parse_text.py
+      - src/ocr_fallback.py
+      - data/rendered
+    params:
+      - ocr
+    outs:
+      - data/parsed
+
+  tables:
+    cmd: python src/tables.py
+    deps:
+      - src/tables.py
+      - src/normalize.py
+      - data/rendered
+    params:
+      - tables
+    outs:
+      - data/tables
+
+  layout:
+    cmd: python src/layout.py
+    deps:
+      - src/layout.py
+      - data/rendered
+    outs:
+      - data/layout
+
+  docling:
+    cmd: python src/run_docling.py
+    deps:
+      - src/run_docling.py
+      - data/rendered
+    outs:
+      - data/docling
+
+  export:
+    cmd: python src/export.py
+    deps:
+      - src/export.py
+      - src/schema.py
+      - data/parsed
+      - data/tables
+    outs:
+      - data/export

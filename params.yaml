@@ -1,0 +1,14 @@
+download:
+  ticker: AAPL
+  forms: ["10-K", "10-Q"]
+  after: "2024-01-01"
+  before: "2026-01-01"
+
+ocr:
+  min_chars: 50
+  junk_ratio: 0.3
+  dpi: 300
+
+tables:
+  min_rulings: 6
+  accept_score: 80

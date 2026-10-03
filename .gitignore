@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Conda/venv
+*.egg-info/
+
+# DVC tracks data, not git
+/data
+
+# OS
+.DS_Store
